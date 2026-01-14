@@ -1,4 +1,4 @@
-# MasterThesis - Nasal Microbiome & Disease Pathogenesis System
+# MasterThesis - NBREATH_DB - Nasal Bacterial & REspiratory Atlas in Humans DataBase
 
 A comprehensive web application designed to model, visualize, and analyze the complex relationships between nasal microbiome species, their interactions, migration patterns, and contributions to disease pathogenesis.
 
@@ -126,7 +126,3 @@ docker exec -it NasoBiomeKnowlegeBase python manage.py import_microbiome --file 
 ## Contributing
 
 This is a Master's Thesis project. Contributions should follow standard pull request workflows.
-
-## License
-
-[Insert License Information Here]
