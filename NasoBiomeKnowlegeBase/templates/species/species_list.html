@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load extras %}
+{% block title %}Species{% endblock %}
+{% block page_title %}Species Management{% endblock %}
+
+{% block content %}
+<!-- Responsive container for page content -->
+<div class="w-full pb-6">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- HEADER -->
+        <div class="flex flex-col sm:flex-row sm:flex-wrap justify-between items-start sm:items-center gap-4 mb-6">
+            <div class="flex-1 min-w-0">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Species</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Manage microbial species in the knowledgebase.</p>
+            </div>
+
+            <!-- Button Responsive -->
+            <a href="{% url 'add_species' %}"
+               class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-gray-900 font-bold rounded-lg hover:opacity-90 shadow-sm transition-opacity whitespace-nowrap">
+                <span class="material-symbols-outlined text-sm">add</span>
+                <span>Add Species</span>
+            </a>
+        </div>
+
+        <!-- TABLE WRAPPER -->
+        <div class="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+            <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]">
+                
+                <!-- TABLE -->
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+
+                    <!-- THEAD -->
+                    <thead class="bg-gray-50 dark:bg-gray-800 sticky top-0 z-10 text-xs">
+                        <tr>
+                            <th class="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-300 uppercase">Name</th>
+                            <th class="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-300 uppercase">Phyla</th>
+                            <th class="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-300 uppercase">Taxonomy</th>
+                            <th class="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-300 uppercase">Genome</th>
+                            <th class="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-300 uppercase text-right">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <!-- TBODY -->
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-sm">
+                        {% for s in species %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-850 transition-colors">
+
+                            <!-- Name -->
+                            <td class="px-3 py-3 font-medium text-gray-900 dark:text-white truncate max-w-[150px] sm:max-w-none">
+                                {{ s.name|truncate }}
+                            </td>
+
+                            <!-- Phyla -->
+                            <td class="px-3 py-3 text-gray-600 dark:text-gray-300 truncate max-w-[140px] sm:max-w-none">
+                                {{ s.phyla|default:"—"|truncate }}
+                            </td>
+
+                            <!-- Taxonomy -->
+                            <td class="px-3 py-3 text-gray-600 dark:text-gray-300 truncate max-w-[160px] sm:max-w-none">
+                                {% if s.genus or s.family %}
+                                {{ s.genus|default:"—"|truncate }} / {{ s.family|default:"—"|truncate }}
+                                {% else %}—{% endif %}
+                            </td>
+
+                            <!-- Genome -->
+                            <td class="px-3 py-3 text-gray-600 dark:text-gray-300 truncate">
+                                {% if s.genome_reference_link %}
+                                <a href="{{ s.genome_reference_link }}" target="_blank" rel="noopener"
+                                   class="text-primary hover:underline">Link</a>
+                                {% else %}—{% endif %}
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="px-3 py-3 text-right font-medium">
+                                <a href="{% url 'get_species_by_id' s.id %}"
+                                   class="text-primary hover:underline flex items-center justify-end gap-1">
+                                    View
+                                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                </a>
+                            </td>
+
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                <div class="flex flex-col items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined text-gray-400">science</span>
+                                    No species found.
+                                    <a href="{% url 'add_species' %}" class="text-primary hover:underline ml-1">Add one?</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGINATION -->
+        {% if species.paginator.num_pages > 1 %}
+        <div class="mt-6 flex justify-center">
+            <nav class="flex flex-wrap items-center gap-1" aria-label="Pagination">
+
+                {% if species.has_previous %}
+                <a href="?page=1" class="px-3 py-1 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">&laquo; First</a>
+                <a href="?page={{ species.previous_page_number }}" class="px-3 py-1 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Previous</a>
+                {% endif %}
+
+                {% for num in species.paginator.page_range %}
+                {% if species.number == num %}
+                <span class="px-3 py-1 rounded-md bg-primary text-gray-900 font-medium">{{ num }}</span>
+                {% else %}
+                <a href="?page={{ num }}" class="px-3 py-1 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">{{ num }}</a>
+                {% endif %}
+                {% endfor %}
+
+                {% if species.has_next %}
+                <a href="?page={{ species.next_page_number }}" class="px-3 py-1 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Next</a>
+                <a href="?page={{ species.paginator.num_pages }}" class="px-3 py-1 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Last &raquo;</a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

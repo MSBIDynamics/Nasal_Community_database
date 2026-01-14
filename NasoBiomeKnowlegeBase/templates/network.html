@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Microbiome Network</title>
+  <script src="https://unpkg.com/neo4j-driver"></script>
+  <script src="https://cdn.jsdelivr.net/npm/neovis.js@1.6.0/dist/neovis.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    #viz {
+      width: 100%;
+      height: 800px;
+      border: 1px solid lightgray;
+    }
+    #status {
+      text-align: center;
+      margin: 10px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Microbiome Network</h1>
+  <div id="status">Loading...</div>
+  <div id="viz"></div>
+
+  <script>
+    async function createNetwork() {
+      const status = document.getElementById('status');
+      
+      try {
+        status.innerHTML = 'Connecting to Neo4j...';
+        
+        // Connect to Neo4j
+        const driver = neo4j.driver(
+          'bolt://localhost:7687',
+          neo4j.auth.basic('neo4j', 'neo4jpassword')
+        );
+        
+        const session = driver.session();
+        
+        status.innerHTML = 'Loading data...';
+        
+        // Get your data
+        const result = await session.run(`
+          MATCH (n)-[r]->(m)
+          RETURN n, r, m LIMIT 50
+        `);
+        
+        // Create nodes and edges for vis.js
+        const nodes = new vis.DataSet();
+        const edges = new vis.DataSet();
+        
+        const nodeMap = new Map();
+        let nodeId = 1;
+        
+        result.records.forEach(record => {
+          const n = record.get('n');
+          const r = record.get('r');
+          const m = record.get('m');
+          
+          // Add start node
+          if (!nodeMap.has(n.identity.toString())) {
+            nodes.add({
+              id: nodeId,
+              label: n.properties.name || n.labels[0],
+              group: n.labels[0]
+            });
+            nodeMap.set(n.identity.toString(), nodeId);
+            nodeId++;
+          }
+          
+          // Add end node  
+          if (!nodeMap.has(m.identity.toString())) {
+            nodes.add({
+              id: nodeId,
+              label: m.properties.name || m.labels[0],
+              group: m.labels[0]
+            });
+            nodeMap.set(m.identity.toString(), nodeId);
+            nodeId++;
+          }
+          
+          // Add edge
+          edges.add({
+            from: nodeMap.get(n.identity.toString()),
+            to: nodeMap.get(m.identity.toString()),
+            label: r.type
+          });
+        });
+        
+        await session.close();
+        await driver.close();
+        
+        status.innerHTML = 'Creating visualization...';
+        
+        // Create the network
+        const container = document.getElementById('viz');
+        const data = { nodes, edges };
+        const options = {};
+        
+        new vis.Network(container, data, options);
+        
+        status.innerHTML = `✅ Loaded ${nodes.length} nodes and ${edges.length} relationships`;
+        
+      } catch (error) {
+        status.innerHTML = `❌ Error: ${error}`;
+        console.error(error);
+      }
+    }
+
+    window.onload = createNetwork;
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content %}
+  {% include "partials/preloader.html" %}
+
+  <div class="flex h-screen overflow-hidden">
+    <!-- ===== Sidebar Start ===== -->
+    {% include "partials/sidebar.html" %}
+    <!-- ===== Sidebar End ===== -->
+
+    <!-- ===== Content Area Start ===== -->
+    <div class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto">
+      <!-- Small Device Overlay Start -->
+      {% include "partials/overlay.html" %}
+      <!-- Small Device Overlay End -->
+
+      <!-- ===== Header Start ===== -->
+      {% include "partials/header.html" %}
+      <!-- ===== Header End ===== -->
+
+      <!-- ===== Main Content Start ===== -->
+      <main class="p-2 sm:p-6">
+        {% block main_content %}
+        {% endblock main_content %}
+      </main>
+      <!-- ===== Main Content End ===== -->
+    </div>
+    <!-- ===== Content Area End ===== -->
+  </div>
+{% endblock %}

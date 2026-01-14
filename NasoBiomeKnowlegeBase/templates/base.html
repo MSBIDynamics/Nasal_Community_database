@@ -1,0 +1,212 @@
+{% load extras %}
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50 dark:bg-gray-900">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Microbiome Dashboard{% endblock %}</title>
+
+    <!-- Tailwind via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#13ec5b",
+                        background: {
+                            light: "#f6f8f6",
+                            dark: "#102216",
+                        }
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Show scrollbar only when needed */
+        ::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #9ca3af;
+        }
+    </style>
+</head>
+
+<body class="h-full flex flex-col font-sans">
+    <div x-data="{ sidebarOpen: false }" class="flex h-full">
+
+        <!-- Sidebar (Desktop + Mobile) -->
+        <aside
+            class="fixed inset-y-0 left-0 z-50 w-64 flex flex-col gap-4 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto"
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" x-cloak>
+            <!-- User Profile -->
+            <div class="flex flex-col gap-4">
+
+                <!-- Navigation Links -->
+                <nav class="flex flex-col gap-2 mt-4">
+                    <a href="{% url 'home' %}"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <span class="text-sm font-medium">Dashboard</span>
+                    </a>
+                    <a href="{% url 'get_all_species' %}"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <span class="material-symbols-outlined">science</span>
+                        <span class="text-sm font-medium">Species</span>
+                    </a>
+                    <a href="{% url 'get_all_body_sites' %}"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <span class="material-symbols-outlined">map</span>
+                        <span class="text-sm font-medium">Body Sites</span>
+                    </a>
+                    <a href="{% url 'get_all_diseases' %}"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <span class="material-symbols-outlined">psychiatry</span>
+                        <span class="text-sm font-medium">Diseases</span>
+                    </a>
+                    <a href="{% url 'get_all_products' %}"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <span class="material-symbols-outlined">inventory</span>
+                        <span class="text-sm font-medium">Products</span>
+                    </a>
+                    <a href="{% url 'get_all_interactions' %}"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <span class="material-symbols-outlined">swap_horiz</span>
+                        <span class="text-sm font-medium">Interactions</span>
+                    </a>
+                    <a href="{% url 'get_all_migrations' %}"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <span class="material-symbols-outlined">travel_explore</span>
+                        <span class="text-sm font-medium">Migrations</span>
+                    </a>
+                    
+                </nav>
+
+                <!-- Functionality Section -->
+                <div class="mt-4 px-3">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Functionality</h3>
+                    <nav class="flex flex-col gap-2">
+                        <a href="{% url 'view_graph' %}"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <span class="material-symbols-outlined">hub</span>
+                            <span class="text-sm font-medium">Graph Visualization</span>
+                        </a>
+                        <a href="#"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-not-allowed opacity-70">
+                            <span class="material-symbols-outlined">groups</span>
+                            <span class="text-sm font-medium">Community Model Creation</span>
+                        </a>
+                        <a href="#"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-not-allowed opacity-70">
+                            <span class="material-symbols-outlined">psychology</span>
+                            <span class="text-sm font-medium">AI-Driven Extraction</span>
+                        </a>
+                        <a href="#"
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-not-allowed opacity-70">
+                            <span class="material-symbols-outlined">cloud_upload</span>
+                            <span class="text-sm font-medium">Data Upload Portal</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Bottom Links -->
+            <!-- <div class="mt-auto flex flex-col gap-2">
+                <a href="#"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="text-sm font-medium">Settings</span>
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <span class="material-symbols-outlined">help</span>
+                    <span class="text-sm font-medium">Help</span>
+                </a>
+            </div> -->
+        </aside>
+
+        <!-- Backdrop for mobile -->
+        <div class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden" x-show="sidebarOpen" x-cloak
+            @click="sidebarOpen = false"></div>
+
+        <!-- Main Content Area -->
+        <div class="flex flex-col flex-1 min-h-screen overflow-hidden">
+            <!-- Top Bar (Mobile Toggle + Page Title Placeholder) -->
+            <header class="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+                <div class="flex items-center justify-between px-4 h-16">
+                    <button @click="sidebarOpen = true" class="lg:hidden text-gray-500 hover:text-gray-700">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div>
+                        {% block header_title %}
+                        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
+                            {% block page_title %}
+                            {% endblock %}</h1>
+                        {% endblock %}
+                    </div>
+                    <!-- Optional: user menu / theme toggle here -->
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 p-4 lg:p-6 overflow-hidden">
+                <div class="w-full h-full flex flex-col overflow-y-auto overflow-x-hidden">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-auto">
+                <div class="max-w-7xl mx-auto py-6 px-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    &copy; 2025 Nasal Microbiome Knowledgebase. All rights reserved.
+                </div>
+            </footer>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,69 @@
+{% load i18n lucide_tags %}
+
+<ul class="flex flex-col gap-2 mb-6">
+  <!-- Dashboard Link -->
+  <li>
+    <a
+      href="{% url 'admin:index' %}"
+      class="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out hover:bg-gray-100 dark:hover:bg-meta-4"
+      :class="'{{ request.path|escapejs }}' === '{% url 'admin:index' %}' ? 'bg-gray-100 dark:bg-meta-4' : ''"
+    >
+      <span class="w-icon">
+        <svg class="fill-current" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5.56875 11.25C5.25938 11.25 5.00625 11.5031 5.00625 11.8125V16.3125C5.00625 16.6219 5.25938 16.875 5.56875 16.875H8.38125C8.69063 16.875 8.94375 16.6219 8.94375 16.3125V12.9375C8.94375 12.6281 9.19688 12.375 9.50625 12.375H10.9125C11.2219 12.375 11.475 12.6281 11.475 12.9375V16.3125C11.475 16.6219 11.7281 16.875 12.0375 16.875H14.85C15.1594 16.875 15.4125 16.6219 15.4125 16.3125V11.8125C15.4125 11.5031 15.1594 11.25 14.85 11.25H5.56875Z" fill=""/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.48937 0.945001C9.20812 0.707813 8.79187 0.707813 8.51062 0.945001L0.869062 7.35188C0.630937 7.55156 0.529687 7.86938 0.61125 8.1675C0.692812 8.46563 0.942187 8.685 1.25156 8.71875L2.10937 8.80875V16.0313C2.10937 16.6528 2.61562 17.1591 3.23719 17.1591H16.7625C17.3841 17.1591 17.8903 16.6528 17.8903 16.0313V8.80875L18.7481 8.71875C19.0575 8.685 19.3069 8.46563 19.3884 8.1675C19.47 7.86938 19.3687 7.55156 19.1306 7.35188L11.4891 0.945001H9.48937ZM10.2094 1.80281L16.2028 6.83719V15.4716H12.6028V12.9375C12.6028 12.0066 11.8434 11.25 10.9125 11.25H9.50625C8.57531 11.25 7.81594 12.0066 7.81594 12.9375V15.4716H3.79688V6.83719L9.79031 1.80281C9.91406 1.69875 10.0856 1.69875 10.2094 1.80281Z" fill=""/>
+        </svg>
+      </span>
+      <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">Dashboard</span>
+    </a>
+  </li>
+
+  {% for app in available_apps %}
+  <li>
+    <div class="px-4 py-2 mt-3 text-xs font-semibold text-gray-500 uppercase dark:text-gray-400" :class="sidebarToggle ? 'lg:hidden' : ''">
+      {{ app.name }}
+    </div>
+    {% for model in app.models %}
+    <a
+      href="{{ model.admin_url }}"
+      class="group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium duration-300 ease-in-out hover:bg-gray-100 dark:hover:bg-meta-4"
+      :class="'{{ request.path|escapejs }}'.startsWith('{{ model.admin_url|escapejs }}') ? 'bg-gray-100 dark:bg-meta-4' : ''"
+    >
+      <span class="w-icon">
+       <!-- You can add specific icons logic here based on model.object_name if needed -->
+        <svg class="stroke-current" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          {% if model.object_name == 'User' %}
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+          {% elif model.object_name == 'Group' %}
+             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          {% elif model.object_name == 'BodySite' %}
+             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle>
+          {% elif model.object_name == 'Disease' %}
+             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          {% elif model.object_name == 'Species' %}
+            <path d="m8 2 1.88 1.88"></path><path d="M14.12 3.88 16 2"></path><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"></path><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"></path><path d="M12 20v-9"></path><path d="M6.53 9C4.6 8.8 3 7.1 3 5"></path><path d="M6 13H2"></path><path d="M3 21c0-2.1 1.7-3.9 3.8-4"></path><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"></path><path d="M22 13h-4"></path><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"></path>
+          {% elif model.object_name == 'Product' %}
+             <path d="m16.5 9.4-9-5.19"></path><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><path d="M3.27 6.96 12 12.01l8.73-5.05"></path><path d="M12 22.08V12"></path>
+          {% elif model.object_name == 'SpeciesInteraction' %}
+             <path d="m16 21 5-5-5-5"></path><path d="M21 16H3"></path><path d="m8 3-5 5 5 5"></path><path d="M3 8h18"></path>
+          {% elif model.object_name == 'MigrationPattern' %}
+             <circle cx="6" cy="19" r="3"></circle><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path><circle cx="18" cy="5" r="3"></circle>
+          {% elif model.object_name == 'ProductEvent' %}
+             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          {% else %}
+             <rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect>
+          {% endif %}
+        </svg>
+      </span>
+
+      <span
+        class="menu-item-text"
+        :class="sidebarToggle ? 'lg:hidden' : ''"
+      >
+        {{ model.name }}
+      </span>
+    </a>
+    {% endfor %}
+  </li>
+  {% endfor %}
+</ul>

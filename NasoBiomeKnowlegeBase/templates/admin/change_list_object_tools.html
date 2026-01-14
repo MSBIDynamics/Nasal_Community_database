@@ -1,0 +1,18 @@
+{% load i18n admin_urls lucide_tags %}
+
+{% block object-tools-items %}
+  {% if has_add_permission %}
+    <li class="list-none">
+        {% url cl.opts|admin_urlname:'add' as add_url %}
+        <a href="{% add_preserved_filters add_url is_popup to_field %}"
+            class="inline-flex items-center gap-x-2 rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-gray-800 dark:text-white/90 shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+            <span class="w-icon">
+                {% lucide 'plus' %}
+            </span>
+            <span>
+                {% blocktranslate with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktranslate %}
+            </span>
+        </a>
+    </li>
+  {% endif %}
+{% endblock %}

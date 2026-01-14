@@ -1,0 +1,29 @@
+{% extends "admin/base_layout.html" %}
+{% load i18n admin_urls static %}
+
+{% block main_content %}
+<div class="col-span-full xl:col-span-12">
+    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6">
+        <h4 class="text-xl font-semibold text-black dark:text-white mb-4">
+            {% translate 'Are you sure?' %}
+        </h4>
+        
+        <p class="mb-6 text-base text-body-color dark:text-body-color-dark">
+            {% blocktranslate with escaped_object=object %}Are you sure you want to delete the {{ object_name }} "{{ escaped_object }}"? All of the following related items will be deleted:{% endblocktranslate %}
+        </p>
+
+        <ul class="mb-6 list-disc list-inside text-body-color dark:text-body-color-dark">
+            {{ deleted_objects|unordered_list }}
+        </ul>
+
+        <form method="post">{% csrf_token %}
+            <div class="flex gap-4">
+                <input type="submit" value="{% translate 'Yes, I'm sure' %}" class="cursor-pointer justify-center rounded bg-danger px-6 py-2 font-medium text-gray hover:bg-opacity-90" />
+                <a href="#" onclick="window.history.back(); return false;" class="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white">
+                    {% translate "No, take me back" %}
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

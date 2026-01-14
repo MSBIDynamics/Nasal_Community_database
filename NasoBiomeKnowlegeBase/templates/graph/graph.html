@@ -1,0 +1,1312 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Nasal Microbiome Interaction and Migration Map</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #fafafa;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .header {
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            color: #333;
+        }
+
+        #graph-container {
+            flex: 1;
+            border: 1px solid #ddd;
+            background: white;
+            overflow: hidden;
+            cursor: grab;
+            position: relative;
+        }
+
+        #graph-container:active {
+            cursor: grabbing;
+        }
+
+        .node {
+            stroke: #fff;
+            stroke-width: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .node:hover {
+            stroke-width: 3px;
+            stroke: #333;
+            filter: brightness(1.1);
+        }
+
+        .node.selected {
+            stroke: #ff6b6b;
+            stroke-width: 4px;
+        }
+
+        .node.expanded {
+            stroke: #51cf66;
+            stroke-width: 3px;
+        }
+
+        .node.dragging {
+            stroke: #000;
+            stroke-width: 3px;
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+            stroke-width: 2px;
+            fill: none;
+            marker-end: url(#arrowhead);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .link:hover {
+            stroke-width: 4px;
+            stroke: #333;
+        }
+
+        .link.selected {
+            stroke: #ff6b6b;
+            stroke-width: 4px;
+        }
+
+        .link.migration {
+            stroke: #f59f00;
+            /* Orange */
+            stroke-width: 2.5px !important;
+            stroke-dasharray: 4, 3;
+        }
+
+        .link.migration:hover {
+            stroke-width: 4px !important;
+            stroke: #e67700;
+        }
+
+        .link.dashed {
+            stroke-dasharray: 4, 3;
+        }
+
+
+        .node-label {
+            pointer-events: none;
+            font-size: 12px;
+            text-anchor: middle;
+            font-weight: 500;
+            fill: #333;
+            user-select: none;
+        }
+
+        /* Relationship Node Styling */
+        .node.relationship-node {
+            fill: #e9ecef !important;
+            stroke: #adb5bd !important;
+            stroke-width: 1px !important;
+            stroke-dasharray: 3, 2;
+        }
+
+        .node.relationship-node:hover {
+            stroke-width: 2px !important;
+            stroke: #666 !important;
+            filter: brightness(0.95);
+        }
+
+        .expand-indicator {
+            pointer-events: none;
+            font-size: 18px;
+            font-weight: bold;
+            text-anchor: middle;
+            fill: white;
+            user-select: none;
+        }
+
+        .tooltip {
+            position: absolute;
+            padding: 8px 10px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            max-width: 250px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+        }
+
+        .controls button {
+            display: block;
+            width: 36px;
+            height: 36px;
+            margin: 4px 0;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .controls button:hover {
+            background: #f0f0f0;
+            border-color: #999;
+        }
+
+        .controls button:active {
+            background: #e0e0e0;
+            transform: scale(0.95);
+        }
+
+        .group-label {
+            font-weight: bold;
+            font-size: 16px;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Right Panel Styles */
+        .side-panel {
+            width: 350px;
+            background: white;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        .panel-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .panel-header p {
+            margin: 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .panel-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .node-detail {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .node-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover {
+            background: #f8f9fa;
+            border-color: #999;
+        }
+
+        .action-btn.primary {
+            background: #4c6ef5;
+            color: white;
+            border-color: #4c6ef5;
+        }
+
+        .action-btn.primary:hover {
+            background: #3b5bdb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4c6ef5;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .property-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .property-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .property-item:last-child {
+            border-bottom: none;
+        }
+
+        .property-key {
+            font-weight: 500;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .property-value {
+            color: #333;
+            font-size: 13px;
+            text-align: right;
+        }
+
+        /* Legend Styles */
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #444;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .legend-shape {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .legend-node {
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .legend-rel-node {
+            border-radius: 50%;
+            border: 1px dashed #adb5bd;
+            background: #e9ecef;
+        }
+
+        .legend-line {
+            height: 2px;
+            width: 20px;
+            background: #999;
+        }
+
+        .legend-line.dashed {
+            background: none;
+            border-top: 2px dashed #999;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="main-content">
+            <div class="header">
+                <h1>Nasal Community Migration and Interaction Map</h1>
+            </div>
+            <div id="graph-container">
+                <div class="controls">
+                    <button id="zoom-in" title="Zoom In">+</button>
+                    <button id="zoom-out" title="Zoom Out">−</button>
+                    <button id="reset" title="Reset View">⟲</button>
+                </div>
+
+                <div class="legend">
+                    <!-- <div class="legend-title">Graph Legend</div> -->
+                    <div class="legend-item">
+                        <div class="legend-shape legend-node" style="background: #ff6b6b;"></div>
+                        <span>Disease</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-shape legend-node" style="background: #339af0;"></div>
+                        <span>Species</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-shape legend-node" style="background: #20c997;"></div>
+                        <span>Body Site</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-shape legend-rel-node"></div>
+                        <span>Interaction / Migration / Biological Event</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line"></div>
+                        <span>Direct Connection</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-line dashed"></div>
+                        <span>Biological Event Context</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <div class="panel-header">
+                <h2>Biological Metadata Viewer</h2>
+                <p>Click on an entity to view details</p>
+            </div>
+            <div class="panel-content" id="panel-content">
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+                    </svg>
+                    <p>Select a entity to view it's details and expand connections</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+        const width = document.getElementById("graph-container").clientWidth;
+        const height = document.getElementById("graph-container").clientHeight;
+
+        const svg = d3.select("#graph-container")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const g = svg.append("g");
+
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 4])
+            .filter(event => {
+                if (event.type === 'wheel') return true;
+                if (event.type === 'mousedown' && event.target.closest('.node')) return false;
+                return !event.ctrlKey && !event.button;
+            })
+            .on("zoom", (event) => {
+                g.attr("transform", event.transform);
+            });
+
+        svg.call(zoom);
+
+        d3.select("#zoom-in").on("click", () => {
+            svg.transition().duration(300).call(zoom.scaleBy, 1.3);
+        });
+
+        d3.select("#zoom-out").on("click", () => {
+            svg.transition().duration(300).call(zoom.scaleBy, 0.7);
+        });
+
+        d3.select("#reset").on("click", () => {
+            window.location.href = window.location.href.split('?')[0];
+        });
+
+        svg.append("defs").append("marker")
+            .attr("id", "arrowhead")
+            .attr("viewBox", "-0 -5 10 10")
+            .attr("refX", 18)
+            .attr("refY", 0)
+            .attr("orient", "auto")
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("markerUnits", "strokeWidth")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr("fill", "#999");
+
+        const tooltip = d3.select("#tooltip");
+
+        // State management
+        let allNodes = [];
+        let allEdges = [];
+        let visibleNodeIds = new Set();
+        let expandedNodeIds = new Set();
+        let selectedNode = null;
+        let selectedLink = null;
+        let nodeMap = new Map();
+
+        const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
+
+        // Load initial graph data
+        function loadInitialGraph() {
+            fetch("/api/get_expanded_graph_data/")
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.nodes || data.nodes.length === 0) {
+                        document.getElementById("graph-container").innerHTML = "<p style='padding: 20px;'>No data available.</p>";
+                        return;
+                    }
+
+                    allNodes = data.nodes;
+                    allEdges = data.links || [];
+
+                    // Position nodes in hierarchical groups
+                    positionNodesInGroups(allNodes);
+
+                    allNodes.forEach(n => {
+                        nodeMap.set(n.id, n);
+                        visibleNodeIds.add(n.id);
+                    });
+
+                    renderGraph();
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    document.getElementById("graph-container").innerHTML = "<p style='padding: 20px;'>Failed to load data.</p>";
+                });
+        }
+
+        function selectNode(node) {
+            selectedNode = node;
+            selectedLink = null; // Deselect link
+            renderGraph();
+            displayNodeDetails(node);
+        }
+
+        function selectLink(link) {
+            selectedLink = link;
+            selectedNode = null; // Deselect node
+            renderGraph();
+            displayLinkDetails(link);
+        }
+
+        function displayLinkDetails(link) {
+            const panel = document.getElementById("panel-content");
+            const source = nodeMap.get(link.from);
+            const target = nodeMap.get(link.to);
+
+            panel.innerHTML = `
+                <div class="node-detail">
+                    <div class="node-badge" style="background: #999; color: white; border: 1px solid #999">
+                        RELATIONSHIP
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-label">Type</div>
+                        <div class="detail-value"><strong>${link.label}</strong></div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Source Node</div>
+                        <div class="detail-value" style="display: flex; align-items: center; gap: 8px;">
+                            <span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${colorScale(source.group)}"></span>
+                            <span>${source.label}</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Target Node</div>
+                        <div class="detail-value" style="display: flex; align-items: center; gap: 8px;">
+                            <span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${colorScale(target.group)}"></span>
+                            <span>${target.label}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function positionNodesInGroups(nodes) {
+            // Group nodes by their group property
+            const groupedNodes = {};
+            nodes.forEach(node => {
+                if (!groupedNodes[node.group]) {
+                    groupedNodes[node.group] = [];
+                }
+                groupedNodes[node.group].push(node);
+            });
+
+            const customOrder = [
+                "Species",
+                "BodySite",
+                "Interaction",
+                "ProductEvent",
+                "Migration",
+                "Product",
+                "Disease"
+            ];
+
+            // Sort "Nose" to the top of BodySite
+            if (groupedNodes["BodySite"]) {
+                groupedNodes["BodySite"].sort((a, b) => {
+                    if (a.label === "Nose") return -1;
+                    if (b.label === "Nose") return 1;
+                    return a.label.localeCompare(b.label);
+                });
+            }
+
+            const groups = Object.keys(groupedNodes).sort((a, b) => {
+                const idxA = customOrder.indexOf(a);
+                const idxB = customOrder.indexOf(b);
+                // If both found, sort by index. If one not found, put it at end.
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return a.localeCompare(b);
+            });
+            const numGroups = groups.length;
+
+            // Layout parameters
+            const columnGap = 80;
+            const maxNodesPerColumn = 15;
+            const minGroupGap = 250;
+            const minSpacing = 70;
+
+            // Calculate columns needed per group
+            const groupColumnCounts = {};
+            groups.forEach(g => {
+                groupColumnCounts[g] = Math.ceil(groupedNodes[g].length / maxNodesPerColumn);
+            });
+
+            // Calculate x positions for each group
+            const groupPositions = {};
+            let currentX = 150;
+
+            groups.forEach(g => {
+                const numColumns = groupColumnCounts[g];
+                const groupWidth = (numColumns - 1) * columnGap;
+
+                groupPositions[g] = {
+                    x: currentX + groupWidth / 2,
+                    nodes: groupedNodes[g]
+                };
+
+                currentX += groupWidth + minGroupGap;
+            });
+
+            // Position nodes within their groups
+            Object.entries(groupPositions).forEach(([group, info]) => {
+                const count = info.nodes.length;
+
+                if (count > maxNodesPerColumn) {
+                    // Multi-column layout
+                    const numColumns = Math.ceil(count / maxNodesPerColumn);
+                    const nodesPerColumn = Math.ceil(count / numColumns);
+                    const availableHeight = height - 100;
+                    const yStep = Math.max(minSpacing, availableHeight / nodesPerColumn);
+
+                    const totalWidth = (numColumns - 1) * columnGap;
+                    const startX = info.x - totalWidth / 2;
+
+                    info.nodes.forEach((node, i) => {
+                        const columnIndex = Math.floor(i / nodesPerColumn);
+                        const rowIndex = i % nodesPerColumn;
+                        const baseStartY = (height - (yStep * (nodesPerColumn - 1))) / 2;
+                        let startY = baseStartY;
+
+                        if (columnIndex % 2 !== 0) {
+                            startY -= yStep / 2;
+                        }
+
+                        node.x = startX + (columnIndex * columnGap);
+                        node.y = startY + (rowIndex * yStep);
+                        node.fx = null;
+                        node.fy = null;
+                    });
+                } else {
+                    // Single column layout
+                    const availableHeight = height - 100;
+                    const yStep = Math.max(minSpacing, availableHeight / count);
+                    const startY = (height - (yStep * (count - 1))) / 2;
+
+                    info.nodes.forEach((node, i) => {
+                        node.x = info.x;
+                        node.y = startY + (i * yStep);
+                        node.fx = null;
+                        node.fy = null;
+                    });
+                }
+            });
+
+            return groupPositions;
+        }
+
+        function layoutForExpandedNode(centerNodeId, visibleNodes, edges) {
+            const centerX = width / 2;
+            const leftX = centerX - 220;
+            const rightX = centerX + 220;
+            const centerY = height / 2;
+
+            const centerNode = visibleNodes.find(n => n.id == centerNodeId);
+            if (!centerNode) {
+                // Fallback: distribute all nodes in a circle if no center
+                const angleStep = (2 * Math.PI) / visibleNodes.length;
+                visibleNodes.forEach((node, i) => {
+                    const angle = i * angleStep;
+                    node.x = centerX + Math.cos(angle) * 150;
+                    node.y = centerY + Math.sin(angle) * 150;
+                });
+                return;
+            }
+
+            // Reset all positions first
+            visibleNodes.forEach(n => {
+                n.x = centerX;
+                n.y = centerY;
+            });
+
+            // Classify neighbors
+            const incoming = new Set(); // to → center
+            const outgoing = new Set(); // center → to
+
+            edges.forEach(e => {
+                if (e.to == centerNodeId && visibleNodeIds.has(e.from)) {
+                    const node = nodeMap.get(e.from);
+                    if (node && node.id !== centerNodeId) incoming.add(node);
+                }
+                if (e.from == centerNodeId && visibleNodeIds.has(e.to)) {
+                    const node = nodeMap.get(e.to);
+                    if (node && node.id !== centerNodeId) outgoing.add(node);
+                }
+            });
+
+            // Convert to arrays for indexing
+            const incomingArr = Array.from(incoming);
+            const outgoingArr = Array.from(outgoing);
+
+            // Position center
+            centerNode.x = centerX;
+            centerNode.y = centerY;
+
+            // Position incoming (left)
+            if (incomingArr.length > 0) {
+                const spacing = Math.max(60, (height - 100) / (incomingArr.length + 1));
+                incomingArr.forEach((node, i) => {
+                    node.x = leftX;
+                    node.y = 50 + spacing * (i + 1);
+                });
+            }
+
+            // Position outgoing (right)
+            if (outgoingArr.length > 0) {
+                const spacing = Math.max(60, (height - 100) / (outgoingArr.length + 1));
+                outgoingArr.forEach((node, i) => {
+                    node.x = rightX;
+                    node.y = 50 + spacing * (i + 1);
+                });
+            }
+
+            // Optional: if there are extra nodes not connected (shouldn't happen, but safe)
+            visibleNodes.forEach(node => {
+                if (node.id !== centerNodeId && !incoming.has(node) && !outgoing.has(node)) {
+                    // Place them below center
+                    const extraNodes = visibleNodes.filter(n =>
+                        n.id !== centerNodeId && !incoming.has(n) && !outgoing.has(n)
+                    );
+                    const idx = extraNodes.indexOf(node);
+                    node.x = centerX + (idx - Math.floor(extraNodes.length / 2)) * 80;
+                    node.y = centerY + 150;
+                }
+            });
+        }
+        function expandNode(nodeId) {
+            // Normalize ID to match the type stored in nodeMap (int vs string)
+            const node = allNodes.find(n => n.id == nodeId);
+            const realId = node ? node.id : nodeId;
+
+            if (expandedNodeIds.has(realId)) {
+                return;
+            }
+            allNodes = [];
+            allEdges = [];
+            visibleNodeIds.clear();
+            expandedNodeIds.clear(); // optional: only one expanded view at a time
+            nodeMap.clear();
+
+            showLoading();
+            let query = ""
+            if (node.group == "Disease") {
+                query += "&mode=pathway";
+            }
+            // Fetch new subgraph around realId
+            fetch(`/api/get_expanded_graph_data/?node_id=${encodeURIComponent(realId)}${query}`)
+                .then(res => res.json())
+                .then(data => {
+                    expandedNodeIds.add(realId);
+
+                    // Process all returned nodes
+                    data.nodes.forEach(n => {
+                        allNodes.push(n);
+                        nodeMap.set(n.id, n);
+                        visibleNodeIds.add(n.id);
+                    });
+
+                    // Add all returned links
+                    allEdges = data.links || [];
+
+                    // Re-layout
+                    positionNodesInGroups(allNodes);
+                    renderGraph();
+
+                    // Update side panel
+                    const expandedNode = nodeMap.get(realId);
+                    if (expandedNode) {
+                        selectedNode = expandedNode;
+                        displayNodeDetails(expandedNode);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error expanding node:", err);
+                }).finally(() => {
+                    hideLoading();
+                });
+        }
+
+        function renderGraph() {
+            const visibleNodes = allNodes.filter(n => visibleNodeIds.has(n.id));
+            const visibleEdges = allEdges.filter(e =>
+                visibleNodeIds.has(e.from) && visibleNodeIds.has(e.to)
+            );
+
+            console.log('Rendering:', visibleNodes.length, 'nodes,', visibleEdges.length, 'edges');
+
+            // Update links FIRST (so they appear behind nodes)
+            const linkGroup = g.selectAll(".links-group").data([null]);
+            const linkGroupEnter = linkGroup.enter().append("g").attr("class", "links-group");
+            const linkGroupMerged = linkGroupEnter.merge(linkGroup);
+
+            const links = linkGroupMerged.selectAll("path.link")
+                .data(visibleEdges, d => `${d.from}-${d.to}`);
+
+            links.exit().remove();
+
+            const linksEnter = links.enter()
+                .append("path")
+                .attr("class", d => {
+                    const relationshipGroups = new Set(["Migration", "ProductEvent", "Interaction"]);
+                    const sourceNode = nodeMap.get(d.from);
+                    const targetNode = nodeMap.get(d.to);
+                    if ((sourceNode && relationshipGroups.has(sourceNode.group)) ||
+                        (targetNode && relationshipGroups.has(targetNode.group))) {
+                        return "link dashed";
+                    }
+                    return "link";
+                })
+                .attr("stroke", "#999")
+                .attr("stroke-width", 2)
+                .attr("fill", "none")
+                .attr("marker-end", "url(#arrowhead)")
+                .on("click", function (event, d) {
+                    event.stopPropagation();
+                    selectLink(d);
+                });
+
+            const linksMerged = linksEnter.merge(links);
+
+            linksMerged.classed("selected", d => selectedLink && selectedLink.from === d.from && selectedLink.to === d.to);
+
+            function updateLinks() {
+                linksMerged.attr("d", d => {
+                    const source = nodeMap.get(d.from);
+                    const target = nodeMap.get(d.to);
+                    if (!source || !target) return "M0,0";
+                    const midX = (source.x + target.x) / 2;
+                    return `M${source.x},${source.y} C${midX},${source.y} ${midX},${target.y} ${target.x},${target.y}`;
+                });
+            }
+
+            updateLinks();
+
+            // Add group labels
+            const groupSet = new Set(visibleNodes.map(n => n.group));
+            const groups = Array.from(groupSet).filter(g => !["Interaction", "ProductEvent", "Migration"].includes(g));
+            const globalMinY = visibleNodes.length > 0 ? Math.min(...visibleNodes.map(n => n.y)) : 0;
+            const unifiedLabelY = globalMinY - 60; // Fixed Y position for all labels
+            const groupInfo = {};
+            groups.forEach(g => {
+                const groupNodes = visibleNodes.filter(n => n.group === g);
+                if (groupNodes.length > 0) {
+                    const avgX = groupNodes.reduce((sum, n) => sum + n.x, 0) / groupNodes.length;
+                    // Use unified Y for alignment, ignoring local minY
+                    groupInfo[g] = { x: avgX, topY: unifiedLabelY };
+                }
+            });
+
+            const labelGroupsLayer = g.selectAll(".labels-layer").data([null]);
+            const labelGroupsLayerEnter = labelGroupsLayer.enter().append("g").attr("class", "labels-layer");
+            const labelGroupsLayerMerged = labelGroupsLayerEnter.merge(labelGroupsLayer);
+
+            const labelGroups = labelGroupsLayerMerged.selectAll(".group-label-group")
+                .data(groups, d => d);
+
+            labelGroups.exit().remove();
+
+            const labelGroupsEnter = labelGroups.enter()
+                .append("g")
+                .attr("class", "group-label-group");
+
+            labelGroupsEnter.append("rect")
+                .attr("rx", 8)
+                .attr("ry", 8)
+                .style("fill", "#ffffff")
+                .style("stroke-width", 2)
+                .style("opacity", 0.95);
+
+            labelGroupsEnter.append("text")
+                .attr("class", "group-label")
+                .attr("text-anchor", "middle")
+                .style("font-weight", "bold")
+                .style("font-size", "18px");
+
+            const labelGroupsMerged = labelGroupsEnter.merge(labelGroups);
+
+            labelGroupsMerged.attr("transform", g =>
+                `translate(${groupInfo[g].x}, ${groupInfo[g].topY})`
+            );
+
+            labelGroupsMerged.select("text")
+                .text(d => d)
+                .style("fill", d => {
+                    if (d === "Disease") return "#ff6b6b";
+                    if (d === "Species") return "#339af0";
+                    if (d === "BodySite") return "#20c997";
+                    return colorScale(d); // Fallback for others
+                })
+                .each(function (d) {
+                    const bbox = this.getBBox();
+                    d3.select(this.parentNode).select("rect")
+                        .attr("x", bbox.x - 10)
+                        .attr("y", bbox.y - 6)
+                        .attr("width", bbox.width + 20)
+                        .attr("height", bbox.height + 12)
+                        .style("stroke", d => {
+                    if (d === "Disease") return "#ff6b6b";
+                    if (d === "Species") return "#339af0";
+                    if (d === "BodySite") return "#20c997";
+                    return colorScale(d); // Fallback for others
+                });
+                });
+
+            // Update nodes LAST (so they appear on top)
+            const nodeGroupLayer = g.selectAll(".nodes-layer").data([null]);
+            const nodeGroupLayerEnter = nodeGroupLayer.enter().append("g").attr("class", "nodes-layer");
+            const nodeGroupLayerMerged = nodeGroupLayerEnter.merge(nodeGroupLayer);
+
+            const nodeGroups = nodeGroupLayerMerged.selectAll(".node-group")
+                .data(visibleNodes, d => d.id);
+
+            nodeGroups.exit().remove();
+
+            const nodeGroupsEnter = nodeGroups.enter()
+                .append("g")
+                .attr("class", "node-group")
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+
+            const drag = d3.drag()
+                .on("start", function (event, d) {
+                    d3.select(this).select("circle").classed("dragging", true);
+                    d.fx = d.x;
+                    d.fy = d.y;
+                })
+                .on("drag", function (event, d) {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                    d.x = event.x;
+                    d.y = event.y;
+                    d3.select(this).attr("transform", `translate(${d.x},${d.y})`);
+                    updateLinks();
+                })
+                .on("end", function (event, d) {
+                    d3.select(this).select("circle").classed("dragging", false);
+                    d.fx = event.x;
+                    d.fy = event.y;
+                });
+
+
+            nodeGroupsEnter.append("circle")
+                .attr("r", d => {
+                    if (["Interaction", "ProductEvent", "Migration"].includes(d.group)) return 6;
+                    if (d.group === "BodySite" && d.label === "Nose") return 22;
+                    return 14;
+                })
+                .attr("class", d => (["Interaction", "ProductEvent", "Migration"].includes(d.group)) ? "node relationship-node" : "node")
+                .attr("fill", d => {
+                    // Custom Colors
+                    if (d.group === "Disease") return "#ff6b6b";   // Red
+                    if (d.group === "Species") return "#339af0";   // Blue
+                    if (d.group === "BodySite") return "#20c997";  // Teal/Green
+                    
+                    // Fallback to scale for others
+                    return colorScale(d.group);
+                })
+                .on("click", function (event, d) {
+                    event.stopPropagation();
+                    selectNode(d);
+                })
+                .on("dblclick", function (event, d) {
+                    event.stopPropagation();
+                    expandNode(d.id);
+                })
+                .on("mouseover", (event, d) => {
+                    tooltip
+                        .style("opacity", 1)
+                        .html(`<strong>${d.label}</strong><br>${d.group}<br><em>Double-click to expand</em>`)
+                        .style("left", (event.pageX + 15) + "px")
+                        .style("top", (event.pageY - 10) + "px");
+                })
+                .on("mouseout", () => tooltip.style("opacity", 0));
+
+            nodeGroupsEnter.append("text")
+                .attr("class", "node-label")
+                .attr("dy", d => (d.group === "BodySite" && d.label === "Nose") ? 38 : 28)
+                .text(d => d.label.length > 10 ? d.label.substring(0, 10) + "…" : d.label);
+
+            const nodeGroupsMerged = nodeGroupsEnter.merge(nodeGroups);
+
+            // Re-apply drag to all nodes so they have the latest updateLinks closure
+            nodeGroupsMerged.call(drag);
+
+            // Apply colors to all circles (including existing ones)
+            nodeGroupsMerged.select("circle")
+                .attr("fill", d => {
+                    if (d.group === "Disease") return "#ff6b6b";   // Red
+                    if (d.group === "Species") return "#339af0";   // Blue
+                    if (d.group === "BodySite") return "#20c997";  // Teal/Green
+                    return colorScale(d.group);
+                })
+                .classed("expanded", d => expandedNodeIds.has(d.id))
+                .classed("selected", d => selectedNode && selectedNode.id === d.id);
+
+            nodeGroupsMerged.attr("transform", d => `translate(${d.x},${d.y})`);
+        }
+
+        function selectNode(node) {
+            selectedNode = node;
+            selectedLink = null;
+            renderGraph();
+            displayNodeDetails(node);
+        }
+
+        function selectLink(link) {
+            selectedLink = link;
+            selectedNode = null;
+            renderGraph();
+            displayLinkDetails(link);
+        }
+
+        function displayLinkDetails(link) {
+            const panel = document.getElementById("panel-content");
+            const source = nodeMap.get(link.from);
+            const target = nodeMap.get(link.to);
+
+            panel.innerHTML = `
+                <div class="node-detail">
+                    <div class="node-badge" style="background: #666; color: white; border: 1px solid #666">
+                        RELATIONSHIP
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-label">Type</div>
+                        <div class="detail-value"><strong>${link.label}</strong></div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Source Node</div>
+                        <div class="detail-value" style="display: flex; align-items: center; gap: 8px; margin-top: 5px;">
+                            <span style="display:inline-block; width: 12px; height: 12px; border-radius: 50%; background: ${colorScale(source.group)}"></span>
+                            <span>${source.label}</span>
+                        </div>
+                        <div style="font-size: 11px; color: #999; margin-top: 2px;">${source.group}</div>
+                    </div>
+
+                    <div style="text-align: center; color: #ccc; margin: 10px 0;">
+                        ↓
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Target Node</div>
+                        <div class="detail-value" style="display: flex; align-items: center; gap: 8px; margin-top: 5px;">
+                            <span style="display:inline-block; width: 12px; height: 12px; border-radius: 50%; background: ${colorScale(target.group)}"></span>
+                            <span>${target.label}</span>
+                        </div>
+                        <div style="font-size: 11px; color: #999; margin-top: 2px;">${target.group}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayNodeDetails(node) {
+            const panel = document.getElementById("panel-content");
+            const color = colorScale(node.group);
+
+            // Build properties HTML
+            let propertiesHtml = '';
+            if (node.properties) {
+                // Exclude internal/duplicate keys if any
+                const excludeKeys = ['id', 'name', 'label', 'description'];
+
+                Object.entries(node.properties).forEach(([key, value]) => {
+                    if (!excludeKeys.includes(key) && value !== null && value !== "" && value !== "None") {
+                        // Format key for display (e.g., mechanism_of_action -> Mechanism Of Action)
+                        const displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                        propertiesHtml += `
+                            <li class="property-item">
+                                <span class="property-key">${displayKey}</span>
+                                <span class="property-value">${value}</span>
+                            </li>
+                        `;
+                    }
+                });
+            }
+
+            if (!propertiesHtml) {
+                propertiesHtml = '<li class="property-item"><span class="property-value">No additional properties</span></li>';
+            }
+
+            // NEW: For Relationship Nodes, find and display connected entities
+            let connectedEntitiesHtml = '';
+            if (["Interaction", "ProductEvent", "Migration"].includes(node.group)) {
+                const connectedEdges = allEdges.filter(e => e.from === node.id || e.to === node.id);
+                if (connectedEdges.length > 0) {
+                    connectedEntitiesHtml += `
+                        <div class="detail-section">
+                            <div class="detail-label" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">Connected Entities</div>
+                            <ul class="property-list">
+                    `;
+
+                    connectedEdges.forEach(edge => {
+                        const isSource = edge.from === node.id;
+                        const neighborId = isSource ? edge.to : edge.from;
+                        const neighbor = nodeMap.get(neighborId);
+
+                        if (neighbor) {
+                            const relationLabel = edge.label.replace(/_/g, ' ');
+                            connectedEntitiesHtml += `
+                                <li class="property-item" style="display: block;">
+                                    <div style="font-size: 11px; color: #999; margin-bottom: 2px;">
+                                        ${isSource ? '→' : '←'} ${relationLabel}
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="display:inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${colorScale(neighbor.group)}"></span>
+                                        <span class="property-value" style="text-align: left;">${neighbor.label}</span>
+                                    </div>
+                                    <div style="font-size: 10px; color: #ccc; margin-left: 18px;">${neighbor.group}</div>
+                                </li>
+                            `;
+                        }
+                    });
+
+                    connectedEntitiesHtml += `</ul></div>`;
+                }
+            }
+
+            panel.innerHTML = `
+                <div class="node-detail">
+                    <div class="node-badge" style="background: ${color}22; color: ${color}; border: 1px solid ${color}">
+                        ${node.group}
+                    </div>
+                    
+                    <div class="detail-section">
+                        <div class="detail-label">Name</div>
+                        <div class="detail-value"><strong>${node.label}</strong></div>
+                    </div>
+
+                    ${node.properties && node.properties.description ? `
+                        <div class="detail-section">
+                            <div class="detail-label">Description</div>
+                            <div class="detail-value">${node.properties.description}</div>
+                        </div>
+                    ` : ''}
+
+                    <div class="detail-section">
+                        <div class="detail-label">Properties</div>
+                        <ul class="property-list">
+                            ${propertiesHtml}
+                        </ul>
+                    </div>
+
+                    ${connectedEntitiesHtml}
+
+                    <div class="action-buttons">
+                        ${!expandedNodeIds.has(node.id) ? `
+                            <button class="action-btn primary" onclick="expandNode('${node.id}')">
+                                Expand Node
+                            </button>
+                        ` : `
+                            <button class="action-btn" disabled style="opacity: 0.5;">
+                                Already Expanded
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showLoading() {
+            const panel = document.getElementById("panel-content");
+            panel.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading connections...</p>
+                </div>
+            `;
+        }
+
+        function hideLoading() {
+            if (selectedNode) {
+                displayNodeDetails(selectedNode);
+            }
+        }
+
+        // Make expandNode available globally
+        window.expandNode = expandNode;
+
+        // Initialize
+        loadInitialGraph();
+        window.addEventListener('resize', () => {
+            const container = document.getElementById("graph-container");
+            const newWidth = container.clientWidth;
+            const newHeight = container.clientHeight;
+            svg.attr("width", newWidth).attr("height", newHeight);
+        });
+    </script>
+</body>
+
+</html>

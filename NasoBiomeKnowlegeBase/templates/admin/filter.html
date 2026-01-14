@@ -1,0 +1,22 @@
+{% load i18n %}
+<details data-filter-title="{{ title }}" open
+  class="mb-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+  
+  <!-- Filter title -->
+  <summary
+    class="cursor-pointer select-none px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-t-lg">
+    {% blocktranslate with filter_title=title %}By {{ filter_title }}{% endblocktranslate %}
+  </summary>
+
+  <!-- Choices list -->
+  <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+    {% for choice in choices %}
+      <li class="{% if choice.selected %}bg-primary-50 dark:bg-primary-900/30{% endif %}">
+        <a href="{{ choice.query_string|iriencode }}"
+           class="block px-4 py-2 text-sm {% if choice.selected %}font-semibold text-primary-600 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400{% endif %}">
+          {{ choice.display }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</details>

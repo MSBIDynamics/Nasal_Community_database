@@ -1,0 +1,62 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block field_sets %}
+  {% for fieldset in adminform %}
+    {% if fieldset.name == None %}
+        {% include "admin/includes/fieldset.html" with heading_level=2 prefix="fieldset" id_prefix=0 id_suffix=forloop.counter0 %}
+    {% endif %}
+  {% endfor %}
+
+  <fieldset class="module aligned">
+    <div class="form-row">
+      <div class="w-full">
+        <label for="group-search">Permission Groups</label>
+        <!-- Search Input -->
+        <div class="my-4">
+          <input type="text" id="group-search" placeholder="Search for permission groups..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <!-- Checkbox List Container -->
+        <div id="permission-groups-container" class="bg-white border border-gray-200 rounded-md p-4 space-y-2 max-h-72 overflow-y-auto">
+          {% for group in all_permission_groups %}
+            <label class="permission-group-item flex items-center font-normal text-sm text-gray-700 cursor-pointer p-1 rounded-md hover:bg-gray-100">
+              <input type="checkbox" name="permissions_groups" value="{{ group.pk }}" 
+                     class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-3 cursor-pointer"
+                     {% if group.pk in selected_permission_group_ids %}checked{% endif %}>
+              <span>{{ group.name }}</span>
+            </label>
+          {% empty %}
+            <p class="text-gray-500">No permission groups found.</p>
+          {% endfor %}
+        </div>
+        <div class="help">Select the Permission Groups that should be included in this Role.</div>
+      </div>
+    </div>
+  </fieldset>
+
+{% endblock %}
+
+
+{% block admin_change_form_document_ready %}
+  {{ block.super }}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const searchInput = document.getElementById('group-search');
+      if (searchInput) {
+        searchInput.addEventListener('input', function (e) {
+          const searchTerm = e.target.value.toLowerCase();
+          
+          document.querySelectorAll('.permission-group-item').forEach(item => {
+            const labelText = item.querySelector('span').textContent.toLowerCase();
+            if (labelText.includes(searchTerm)) {
+              item.style.display = 'flex';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        });
+      }
+    });
+  </script>
+{% endblock %}

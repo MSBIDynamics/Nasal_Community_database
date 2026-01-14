@@ -1,0 +1,54 @@
+{% load i18n %}
+<div class="actions flex flex-wrap items-center gap-3 p-3 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-sm">
+  {% block actions %}
+    
+    {% block actions-form %}
+      <div class="flex items-center gap-2">
+        {% for field in action_form %}
+          {% if field.label %}
+            <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+              <span>{{ field.label }}</span>
+              {{ field }}
+            </label>
+          {% else %}
+            {{ field }}
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endblock %}
+
+    {% block actions-submit %}
+      <button type="submit"
+        class="inline-flex items-center rounded-md bg-primary-600 px-3 py-1.5 font-medium dark:text-white shadow-sm hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-600"
+        title="{% translate "Run the selected action" %}"
+        name="index" value="{{ action_index|default:0 }}">
+        {% translate "Go" %}
+      </button>
+    {% endblock %}
+
+    {% block actions-counter %}
+      {% if actions_selection_counter %}
+        <span class="ml-2 text-gray-600 dark:text-gray-400 action-counter" data-actions-icnt="{{ cl.result_list|length }}">
+          {{ selection_note }}
+        </span>
+        {% if cl.result_count != cl.result_list|length %}
+          <span class="all hidden text-gray-600 dark:text-gray-400">{{ selection_note_all }}</span>
+          <span class="question hidden text-gray-600 dark:text-gray-400">
+            <a role="button" href="#"
+               class="underline hover:text-primary-600 dark:hover:text-primary-400"
+               title="{% translate "Click here to select the objects across all pages" %}">
+              {% blocktranslate with cl.result_count as total_count %}Select all {{ total_count }} {{ module_name }}{% endblocktranslate %}
+            </a>
+          </span>
+          <span class="clear hidden">
+            <a role="button" href="#"
+               class="underline hover:text-primary-600 dark:hover:text-primary-400">
+              {% translate "Clear selection" %}
+            </a>
+          </span>
+        {% endif %}
+      {% endif %}
+    {% endblock %}
+
+  {% endblock %}
+</div>

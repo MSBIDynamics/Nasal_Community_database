@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="40" viewBox="0 0 150 40" fill="none">
+  <rect width="40" height="40" rx="8" fill="#3b82f6"/>
+  <path d="M20 10L28 20L20 30L12 20L20 10Z" fill="white"/>
+  <text x="50" y="28" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1f2937">Pharmacy</text>
+</svg>

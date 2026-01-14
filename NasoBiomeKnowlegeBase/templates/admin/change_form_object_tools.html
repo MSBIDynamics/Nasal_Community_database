@@ -1,0 +1,30 @@
+{% load i18n admin_urls lucide_tags %}
+{% block object-tools-items %}
+<div class="flex items-center gap-x-3">
+  <li>
+    {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
+    <a
+      href="{% add_preserved_filters history_url %}"
+      class="inline-flex items-center gap-x-2 rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+    >
+      <span class="w-5 h-5 text-gray-500 dark:text-gray-400">
+        {% lucide 'history' %}
+      </span>
+      <span>{% translate "History" %}</span></a
+    >
+  </li>
+  {% if has_absolute_url %}
+  <li>
+    <a
+      href="{{ absolute_url }}"
+      class="inline-flex items-center gap-x-2 rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+    >
+      <span class="w-5 h-5 text-gray-500 dark:text-gray-400">
+        {% lucide 'external-link' %}
+      </span>
+      <span>{% translate "View on site" %}</span>
+    </a>
+  </li>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "admin/base_layout.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block main_content %}
+<div class="p-4 mx-auto max-w-screen-2xl md:p-6 2xl:p-10">
+  <form {% if has_file_field %}enctype="multipart/form-data"{% endif %} action="{{ form_url }}" method="post" id="{{ opts.model_name }}_form" novalidate>
+    {% csrf_token %}
+    
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-black">
+      
+      <!-- Render Django's non-field errors first -->
+      {% if form.non_field_errors %}
+      <div class="p-3 mb-6 text-sm text-red-700 bg-red-100 border border-red-200 rounded-lg dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/20" role="alert">
+          {% for error in form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
+      </div>
+      {% endif %}
+      
+      <!-- Render the form fields using Django's fieldset include -->
+      {% for fieldset in adminform %}
+        {% include "admin/includes/fieldset.html" %}
+      {% endfor %}
+
+    </div>
+
+    <!-- Render the save buttons at the bottom -->
+    <div class="mt-6">
+      {% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
+    </div>
+  </form>
+</div>
+{% endblock main_content %}

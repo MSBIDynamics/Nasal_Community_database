@@ -1,0 +1,16 @@
+{% load i18n static lucide_tags custom_tags %}
+<div class="grid gap-4 md:gap-6 grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
+  {% stats_card title="Organizations" value=organizations icon_name="building-2" change_text="11.01%" change_icon_name="trending-up" %}
+
+  {% stats_card title="Departments" value=departments icon_name="building" change_text="11.01%" change_icon_name="trending-up" %}
+
+  {% stats_card title="Groups" value=groups icon_name="users-round" change_text="1.2%" change_icon_name="trending-up" %}
+
+  {% stats_card title="Active Users" value=users icon_name="users" change_text="12%" change_icon_name="trending-up" %}
+
+  {% stats_card title="Oath Apps" value=oauth_apps icon_name="zap" change_text="12%" change_icon_name="trending-up" %}
+
+  {% stats_card title="Active Tokens" value=access_tokens icon_name="key" change_text="12%" change_icon_name="trending-up" %}
+
+  {% stats_card title="API Requests" value="847K" icon_name="activity" change_text="12%" change_icon_name="trending-up" %}
+</div>

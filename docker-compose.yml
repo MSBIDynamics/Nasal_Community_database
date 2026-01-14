@@ -1,0 +1,65 @@
+services:
+  web:
+    build: ./NasoBiomeKnowlegeBase
+    container_name: NasoBiomeKnowlegeBase
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./NasoBiomeKnowlegeBase:/app
+    depends_on:
+      - neo4j
+    restart: always
+    ports:
+      - "8000:8000"
+    networks: 
+      - app_network
+
+  neo4j:
+    image: neo4j:5.17.0
+    container_name: neo4j_db
+    restart: unless-stopped
+    environment:
+      - NEO4J_AUTH=neo4j/neo4jpassword
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    networks: 
+      - app_network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_lb
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks: 
+      - app_network
+  
+  postgres:
+    image: postgres:15
+    container_name: thesis_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: thesis_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+volumes:
+  neo4j_data:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge

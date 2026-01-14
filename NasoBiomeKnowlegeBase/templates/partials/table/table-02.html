@@ -1,0 +1,76 @@
+<!-- Search bar (optional, can be separate) -->
+{% if search_placeholder %}
+<div class="mb-6">
+    <label class="flex flex-col min-w-40 h-12 w-full">
+        <div
+            class="flex w-full flex-1 items-stretch rounded-lg h-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+            <div class="text-gray-500 dark:text-gray-400 flex items-center justify-center pl-4">
+                <span class="material-symbols-outlined">search</span>
+            </div>
+            <input type="text"
+                class="flex w-full min-w-0 flex-1 resize-none overflow-hidden text-gray-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 text-base"
+                placeholder="{{ search_placeholder }}" x-model="searchQuery" />
+        </div>
+    </label>
+</div>
+{% endif %}
+
+<!-- Table -->
+<div class="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+    <table class="w-full">
+        <thead>
+            <tr class="bg-gray-50 dark:bg-gray-800">
+                {% for header in table_headers %}
+                <th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 text-sm font-medium">{{ header }}</th>
+                {% endfor %}
+                {% if show_actions %}
+                <th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300 text-sm font-medium">Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_data %}
+            <tr class="border-t border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-850">
+                {% for cell in row %}
+                <td class="px-4 py-3 text-gray-700 dark:text-gray-300 text-sm">{{ cell }}</td>
+                {% endfor %}
+                {% if show_actions %}
+                <td class="px-4 py-3">
+                    <div class="flex items-center gap-2">
+                        {% if edit_url_name %}
+                        <a href="{% url edit_url_name row.id %}"
+                            class="flex items-center justify-center size-8 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-white">
+                            <span class="material-symbols-outlined text-xl">edit</span>
+                        </a>
+                        {% endif %}
+                        {% if delete_url_name %}
+                        <a href="{% url delete_url_name row.id %}"
+                            class="flex items-center justify-center size-8 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-red-500 dark:hover:text-red-500">
+                            <span class="material-symbols-outlined text-xl">delete</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{{ table_headers|length|add:1 if show_actions else table_headers|length }}"
+                    class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                    No records found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Optional: Pagination block -->
+{% if pagination %}
+<div class="flex items-center justify-center pt-6">
+    <nav class="flex items-center gap-2">
+        <!-- You can integrate your paginator here -->
+        {% block pagination %}{% endblock %}
+    </nav>
+</div>
+{% endif %}

@@ -1,0 +1,105 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n admin_urls static %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} object-history bg-gray-100 dark:bg-gray-900{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs text-sm mb-4 px-6 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <a href="{% url 'admin:index' %}" class="text-blue-600 hover:underline dark:text-blue-400">{% trans 'Home' %}</a>
+    <span class="mx-2 text-gray-400">&rsaquo;</span>
+    <a href="{% url 'admin:app_list' app_label=opts.app_label %}" class="text-blue-600 hover:underline dark:text-blue-400">{{ opts.app_config.verbose_name }}</a>
+    <span class="mx-2 text-gray-400">&rsaquo;</span>
+    <a href="{% url opts|admin_urlname:'changelist' %}" class="text-blue-600 hover:underline dark:text-blue-400">{{ opts.verbose_name_plural|capfirst }}</a>
+    <span class="mx-2 text-gray-400">&rsaquo;</span>
+    <a href="{% url opts|admin_urlname:'change' object.pk|unlocalize %}" class="text-blue-600 hover:underline dark:text-blue-400">{{ object|truncatewords:"18" }}</a>
+    <span class="mx-2 text-gray-400">&rsaquo;</span>
+    <span class="text-gray-600 dark:text-gray-300">{% trans 'History' %}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main" class="px-4 sm:px-6 lg:px-8 py-8">
+    <div class="w-full max-w-5xl mx-auto">
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+                <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                    {% blocktrans with verbose_name=opts.verbose_name %}Change history: {{ verbose_name }}{% endblocktrans %}
+                    <span class="font-bold ml-2">"{{ object }}"</span>
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    A log of all additions, changes, and deletions made to this object.
+                </p>
+            </div>
+
+            <!-- History Log List -->
+            <div class="flow-root">
+                {% if action_list %}
+                <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for action in action_list %}
+                    <li class="px-6 py-5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
+                        <div class="relative flex flex-col sm:flex-row sm:items-start gap-4">
+
+                            <!-- User Avatar and Name -->
+                            <div class="flex-shrink-0 flex items-center gap-3 w-full sm:w-64">
+                                <img class="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-700" src="https://ui-avatars.com/api/?name={{ action.user.get_full_name|default:action.user.first_name|urlencode }}&background=random&color=fff" alt="User avatar">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                        {{ action.user.get_full_name|default:action.user.first_name }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ action.user.email }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Action Details -->
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                    {% if action.is_addition %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                                            Added
+                                        </span>
+                                    {% elif action.is_change %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                                            Changed
+                                        </span>
+                                    {% elif action.is_deletion %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
+                                            Deleted
+                                        </span>
+                                    {% endif %}
+                                    <span class="ml-1">{{ action.get_change_message }}</span>
+                                </p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    <time datetime="{{ action.action_time|date:'c' }}">
+                                        {{ action.action_time|date:"F j, Y, P" }}
+                                        <span class="mx-1">&bull;</span>
+                                        ({{ action.action_time|timesince }} ago)
+                                    </time>
+                                </p>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="px-6 py-20 text-center">
+                    <div class="flex flex-col items-center">
+                        <svg class="h-12 w-12 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-200">No History</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">There are no changes recorded for this object yet.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-6">
+            <a href="{% url opts|admin_urlname:'change' object.pk|unlocalize %}" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:ring-offset-gray-800">
+                &larr; Back to {{ opts.verbose_name }}
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

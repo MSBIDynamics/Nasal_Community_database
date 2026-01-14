@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Edit {{ site.name }}{% endblock %}
+{% block page_title %}Edit Body Site{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Body Site</h1>
+    <p class="text-gray-600 dark:text-gray-400">Update details for <span class="font-medium">{{ site.name }}</span>.</p>
+  </div>
+  {% url 'get_all_body_sites' as cancel_url %}
+  {% include "partials/form.html" with form=form cancel_url=cancel_url submit_buttons_partial="partials/edit_form_buttons.html" %}
+
+  <div 
+    x-data="{ open: false }"
+    @open-delete-dialog.window="open = true"
+    x-show="open"
+    class="fixed inset-0 z-50 overflow-y-auto"
+    style="display: none;"
+    x-cloak
+  >
+    {% include "partials/delete_confirmation.html" with table_name="Body Site" table_item=site.name %}
+  </div>
+
+  <form method="POST" id="delete-form" x-cloak>
+    {% csrf_token %}
+    <input type="hidden" name="delete" value="1">
+  </form>
+</div>
+{% endblock %}

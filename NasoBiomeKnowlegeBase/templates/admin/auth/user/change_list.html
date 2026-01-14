@@ -1,0 +1,75 @@
+{% extends "admin/base_layout.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrahead %}
+{{ block.super }}
+{{ media.js }}
+{% endblock %}
+
+{% block main_content %}
+<div class="col-span-full xl:col-span-12">
+    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div class="px-4 py-6 md:px-6 xl:px-7.5 flex justify-between items-center">
+            <h4 class="text-xl font-semibold text-black dark:text-white">
+                {{ cl.opts.verbose_name_plural|capfirst }}
+            </h4>
+            
+            {% block object-tools %}
+                <ul class="flex gap-4">
+                    {% block object-tools-items %}
+                        {% if has_add_permission %}
+                        <li>
+                            <a href="{% url cl.opts|admin_urlname:'add' %}{% if is_popup %}?_popup=1{% endif %}" class="inline-flex items-center justify-center rounded-md bg-primary px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10">
+                                {% blocktranslate with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktranslate %}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endblock %}
+                </ul>
+            {% endblock %}
+        </div>
+
+        <div class="p-4 border-t border-stroke dark:border-strokedark">
+            {% block search %}{% search_form cl %}{% endblock %}
+        </div>
+        
+        <form id="changelist-form" method="post" {% if cl.formset and cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
+        {% if cl.formset %}
+            <div>{{ cl.formset.management_form }}</div>
+        {% endif %}
+
+        <div class="max-w-full overflow-x-auto">
+            <table class="w-full table-auto">
+                <thead>
+                    <tr class="bg-gray-2 text-left dark:bg-meta-4">
+                        {% for header in result_headers %}
+                        <th class="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white" {{ header.class_attrib }}>
+                            {% if header.sortable %}
+                                <a href="{{ header.url_primary }}">{{ header.text|capfirst }}</a>
+                            {% else %}
+                                <span>{{ header.text|capfirst }}</span>
+                            {% endif %}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        {% if result.form.non_field_errors %}
+                            <tr><td colspan="{{ result|length }}">{{ result.form.non_field_errors }}</td></tr>
+                        {% endif %}
+                        <tr class="{% cycle 'bg-white dark:bg-boxdark' 'bg-gray dark:bg-meta-4' %}">
+                           {{ result }}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="p-4 border-t border-stroke dark:border-strokedark flex justify-between items-center">
+           {% block pagination %}{% pagination cl %}{% endblock %}
+        </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

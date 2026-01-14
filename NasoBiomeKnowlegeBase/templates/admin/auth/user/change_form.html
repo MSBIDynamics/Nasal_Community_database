@@ -1,0 +1,66 @@
+{% extends "admin/base_layout.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}
+{{ block.super }}
+{{ media.js }}
+{% endblock %}
+
+{% block main_content %}
+<div class="col-span-full xl:col-span-12">
+    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div class="px-4 py-6 md:px-6 xl:px-7.5 border-b border-stroke dark:border-strokedark">
+            <h4 class="text-xl font-semibold text-black dark:text-white">
+                {% if add %}{% blocktranslate with name=opts.verbose_name %}Add {{ name }}{% endblocktranslate %}{% else %}{{ original|truncatewords:"18" }}{% endif %}
+            </h4>
+        </div>
+        
+        <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.model_name }}_form" novalidate>
+            {% csrf_token %}
+            {% block form_top %}{% endblock %}
+            
+            <div class="p-6.5">
+                {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}
+                {% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}">{% endif %}
+                
+                {% if save_on_top %}{% block submit_buttons_top %}{% submit_row %}{% endblock %}{% endif %}
+                
+                {% if errors %}
+                    <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                         {% if errors|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+                         {{ adminform.form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {% block field_sets %}
+                    {% for fieldset in adminform %}
+                      {% include "admin/includes/fieldset.html" %}
+                    {% endfor %}
+                {% endblock %}
+
+                {% block after_field_sets %}{% endblock %}
+
+                {% block inline_field_sets %}
+                    {% for inline_admin_formset in inline_admin_formsets %}
+                        {% include inline_admin_formset.opts.template %}
+                    {% endfor %}
+                {% endblock %}
+
+                {% block after_related_objects %}{% endblock %}
+
+                <div class="mt-6 flex justify-end gap-4">
+                     {% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
+                </div>
+                
+                {% if adminform and add %}
+                    <script id="django-admin-form-add-constants" src="{% static 'admin/js/change_form.js' %}"
+                        {% if adminform and add %}
+                            data-model-name="{{ opts.model_name }}"
+                        {% endif %}>
+                    </script>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

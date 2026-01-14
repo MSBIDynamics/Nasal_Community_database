@@ -1,0 +1,6 @@
+{% extends "admin/base_layout.html" %}
+{% load static custom_tags lucide_tags admin_urls %}
+
+{% block main_content %}
+    {% data_table_card title="Permissions" headers=table_headers rows=table_rows %}
+{% endblock %}

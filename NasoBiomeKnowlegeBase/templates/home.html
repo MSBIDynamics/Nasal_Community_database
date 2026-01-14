@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div 
+    class="w-full h-full bg-cover bg-center rounded-lg shadow-lg"
+    style="background-image: url('{% static 'images/naso.jpg' %}');"
+>
+    <div class="text-white text-2xl font-bold p-4"
+         style="text-shadow:
+                -2px -2px 3px black,
+                 2px -2px 3px black,
+                -2px  2px 3px black,
+                 2px  2px 3px black;">
+        NBREATH_DB - Nasal Bacterial & REspiratory Atlas in Humans DataBase
+    </div>
+
+    <p class="text-white p-4"
+       style="text-shadow:
+              -2px -2px 3px black,
+               2px -2px 3px black,
+              -2px  2px 3px black,
+               2px  2px 3px black;">
+        A platform for exploring nasal microbiome clinical </br>
+        relevance through an interactive knowledge graph.
+    </p>
+</div>
+
+
+<!-- KPI Summary Cards -->
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+
+    <!-- Species -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-indigo-500">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-lg">
+                    <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400">science</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Species</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ kpi.species_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Body Sites -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-emerald-500">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-lg">
+                    <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">map</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Body Sites</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ kpi.body_sites_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diseases -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-rose-500">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-rose-100 dark:bg-rose-900/30 p-3 rounded-lg">
+                    <span class="material-symbols-outlined text-rose-600 dark:text-rose-400">psychiatry</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Diseases</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ kpi.diseases_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-amber-500">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg">
+                    <span class="material-symbols-outlined text-amber-600 dark:text-amber-400">inventory</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Products</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ kpi.products_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactions -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-violet-500">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-violet-100 dark:bg-violet-900/30 p-3 rounded-lg">
+                    <span class="material-symbols-outlined text-violet-600 dark:text-violet-400">swap_horiz</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Interactions</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ kpi.interactions_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Migrations -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-cyan-500">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-cyan-100 dark:bg-cyan-900/30 p-3 rounded-lg">
+                    <span class="material-symbols-outlined text-cyan-600 dark:text-cyan-400">travel_explore</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Migrations</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ kpi.migrations_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graph Nodes (Optional: total entities) -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-primary">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400">hub</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Nodes</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ kpi.total_nodes }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graph Relationships -->
+    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-gray-500">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">link</span>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Relationships</h3>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ kpi.total_relationships }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Optional: Recent Activity or Quick Actions -->
+<div class="mt-10">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+    <div class="flex flex-wrap gap-3">
+        <a href="{% url 'export_all_to_neo4j' %}"
+            class="inline-flex items-center px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg text-sm font-medium hover:bg-emerald-200 dark:hover:bg-emerald-800">
+            <span class="material-symbols-outlined mr-1">sync</span> Export to Neo4j
+        </a>
+    </div>
+</div>
+
+{% endblock %}

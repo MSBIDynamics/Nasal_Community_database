@@ -1,0 +1,105 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n admin_urls static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media }}
+    <script src="{% static 'admin/js/cancel.js' %}" async></script>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} delete-confirmation delete-selected-confirmation bg-gray-100{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs text-sm mb-4 px-6 py-3 bg-white border-b border-gray-200">
+    <a href="{% url 'admin:index' %}" class="text-blue-600 hover:underline">{% translate 'Home' %}</a>
+    <span class="mx-2 text-gray-400">&rsaquo;</span>
+    <a href="{% url 'admin:app_list' app_label=opts.app_label %}" class="text-blue-600 hover:underline">{{ opts.app_config.verbose_name }}</a>
+    <span class="mx-2 text-gray-400">&rsaquo;</span>
+    <a href="{% url opts|admin_urlname:'changelist' %}" class="text-blue-600 hover:underline">{{ opts.verbose_name_plural|capfirst }}</a>
+    <span class="mx-2 text-gray-400">&rsaquo;</span>
+    <span class="text-gray-600">{% translate 'Delete multiple objects' %}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main" class="max-w-4xl mx-auto mt-8 p-8 bg-white rounded-lg shadow-md">
+
+{% if perms_lacking %}
+    {# Case 1: User lacks permission to delete related objects #}
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-800 p-6 rounded-md" role="alert">
+        <h2 class="text-2xl font-bold mb-4">{% translate 'Cannot Delete Objects' %}</h2>
+        <p class="mb-4">{% blocktranslate %}Deleting the selected {{ objects_name }} would result in deleting related objects, but your account doesn't have permission to delete the following types of objects:{% endblocktranslate %}</p>
+        <ul class="list-disc list-inside space-y-1 text-red-900 font-mono text-sm">
+            {{ perms_lacking|unordered_list }}
+        </ul>
+    </div>
+    <div class="mt-6">
+        <a href="{% url opts|admin_urlname:'changelist' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            {% translate "Back to list" %}
+        </a>
+    </div>
+
+{% elif protected %}
+    {# Case 2: Deletion is blocked by protected objects #}
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-6 rounded-md" role="alert">
+        <h2 class="text-2xl font-bold mb-4">{% translate 'Cannot Delete Objects' %}</h2>
+        <p class="mb-4">{% blocktranslate %}Deleting the selected {{ objects_name }} would require deleting the following protected related objects:{% endblocktranslate %}</p>
+        <ul class="list-disc list-inside space-y-1 text-yellow-900 font-mono text-sm">
+            {{ protected|unordered_list }}
+        </ul>
+    </div>
+    <div class="mt-6">
+        <a href="{% url opts|admin_urlname:'changelist' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            {% translate "Back to list" %}
+        </a>
+    </div>
+
+{% else %}
+    {# Case 3: Standard multi-object deletion confirmation #}
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">
+        {% blocktranslate with count=queryset.count %}Confirm Deletion of {{ count }} {{ objects_name }}{% endblocktranslate %}
+    </h1>
+    <p class="text-lg text-gray-600 mb-6">
+        {% blocktranslate %}Are you sure? All of the following objects and their related items will be permanently deleted:{% endblocktranslate %}
+    </p>
+
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+        {% include "admin/includes/object_delete_summary.html" %}
+        
+        <h2 class="text-xl font-semibold text-red-800 mb-4 mt-4">{% translate "Objects to be deleted:" %}</h2>
+        
+        <div class="max-h-80 overflow-y-auto pr-2 border-t border-red-200">
+            {% for deletable_object in deletable_objects %}
+                <div class="py-3 border-b border-red-100 last:border-b-0">
+                    <ul class="list-disc list-inside space-y-2 text-red-900">
+                        {{ deletable_object|unordered_list }}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        {# These hidden inputs are CRITICAL for the action to work #}
+        {% for obj in queryset %}
+            <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}">
+        {% endfor %}
+        <input type="hidden" name="action" value="delete_selected">
+        <input type="hidden" name="post" value="yes">
+        
+        <div class="flex items-center gap-x-4 mt-8">
+            <button type="submit" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                {% translate "Yes, I am sure" %}
+            </button>
+            
+            <a href="#" class="cancel-link inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                {% translate "No, take me back" %}
+            </a>
+        </div>
+    </form>
+{% endif %}
+
+</div>
+{% endblock %}

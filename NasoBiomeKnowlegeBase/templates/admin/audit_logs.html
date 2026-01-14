@@ -1,0 +1,6 @@
+{% extends "admin/base_layout.html" %}
+{% load static custom_tags %}
+
+{% block main_content %}
+  {% data_table_card title="All Audit Logs" headers=table_headers rows=table_rows see_all_url="#" %}
+{% endblock %}

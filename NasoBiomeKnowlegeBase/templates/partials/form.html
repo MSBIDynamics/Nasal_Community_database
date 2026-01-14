@@ -1,0 +1,40 @@
+<form method="POST" class="space-y-6 ml-1">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-6">
+      <div class="text-red-700 dark:text-red-300">
+        {% for error in form.non_field_errors %}
+          <div>{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% for field in form %}
+    <div class="space-y-2">
+      <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        {{ field.label }}
+        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+      </label>
+
+      {{ field }}
+
+      {% if field.errors %}
+        <div class="text-red-600 dark:text-red-400 text-sm mt-1">
+          {% for error in field.errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if field.help_text %}
+        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">{{ field.help_text }}</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  {% if submit_buttons_partial %}
+    {% include submit_buttons_partial %}
+  {% endif %}
+</form>

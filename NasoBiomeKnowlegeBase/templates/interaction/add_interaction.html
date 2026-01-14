@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Add Interaction{% endblock %}
+{% block page_title %}Add Interaction{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+  {% url 'get_all_interactions' as cancel_url %}
+  {% include "partials/form.html" with cancel_url=cancel_url submit_buttons_partial="partials/create_form_buttons.html" %}
+</div>
+{% endblock %}

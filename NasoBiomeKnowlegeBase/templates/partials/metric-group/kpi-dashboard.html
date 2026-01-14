@@ -1,0 +1,28 @@
+{% load i18n static lucide_tags custom_tags %}
+<div class="grid gap-4 md:gap-6 grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
+  
+  <!-- Species -->
+  {% stats_card title="Species" value=kpi.species_count icon_name="dna" icon_bg_class="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400" %}
+
+  <!-- Body Sites -->
+  {% stats_card title="Body Sites" value=kpi.body_sites_count icon_name="map-pin" icon_bg_class="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" %}
+
+  <!-- Diseases -->
+  {% stats_card title="Diseases" value=kpi.diseases_count icon_name="activity" icon_bg_class="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400" %}
+
+  <!-- Products -->
+  {% stats_card title="Products" value=kpi.products_count icon_name="package" icon_bg_class="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" %}
+
+  <!-- Interactions -->
+  {% stats_card title="Interactions" value=kpi.interactions_count icon_name="arrow-left-right" icon_bg_class="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" %}
+
+  <!-- Migrations -->
+  {% stats_card title="Migrations" value=kpi.migrations_count icon_name="plane" icon_bg_class="bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400" %}
+
+  <!-- Total Nodes -->
+  {% stats_card title="Total Nodes" value=kpi.total_nodes icon_name="network" icon_bg_class="bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" %}
+
+  <!-- Relationships -->
+  {% stats_card title="Relationships" value=kpi.total_relationships icon_name="link" icon_bg_class="bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300" %}
+
+</div>
