@@ -102,27 +102,6 @@ The application provides the following key endpoints:
 | **Expanded Graph** | `/api/get_expanded_graph_data/` | API for dynamic graph data. |
 | **Export** | `/export-all/` | Trigger bulk export to Neo4j. |
 
-## Data Import
-
-The system includes a custom management command to import microbiome data from an Excel file (specifically structured like `Nasal20Microbiomes.xlsx`).
-
-### Running the Import
-
-To import data from the default location (`../data/Nasal20Microbiomes.xlsx` relative to the app):
-
-```bash
-docker exec -it NasoBiomeKnowlegeBase python manage.py import_microbiome
-```
-
-To specify a custom file path:
-
-```bash
-docker exec -it NasoBiomeKnowlegeBase python manage.py import_microbiome --file /path/to/your/file.xlsx
-```
-
-> **Note**: Ensure the file path is accessible inside the container (e.g., in the mounted volume).
-
-
 ## Contributing
 
 This is a Master's Thesis project. Contributions should follow standard pull request workflows.
