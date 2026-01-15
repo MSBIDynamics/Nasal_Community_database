@@ -58,8 +58,8 @@ Comprehensive management forms and APIs for:
 
 1.  **Clone the Repository**
     ```bash
-    git clone <repository_url>
-    cd MasterThesis
+    git clone https://github.com/MSBIDynamics/Nasal_Community_database.git
+    cd Nasal_Community_database
     ```
 
 2.  **Start Services**
