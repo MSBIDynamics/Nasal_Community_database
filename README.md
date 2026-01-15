@@ -2,7 +2,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Python Version](https://img.shields.io/badge/python-3.10-blue.svg)
 ![GitHub last commit](https://img.shields.io/github/last-commit/MSBIDynamics/Nasal_Community_database/main)
-![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.18262550)
+![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.18262551)
 
 ![NBREATH_DB Logo](NasoBiomeKnowlegeBase/static/images/Repo.png)
 
