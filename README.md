@@ -1,7 +1,7 @@
 <!-- Badges -->
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Python Version](https://img.shields.io/badge/python-3.10-blue.svg)
-![GitHub last commit](https://img.shields.io/github/last-commit/Ridaa88/repo/main)
+![GitHub last commit](https://img.shields.io/github/last-commit/MSBIDynamics/Nasal_Community_database/main)
 ![Zenodo DOI](https://img.shields.io/badge/DOI-10.1234/zenodo.XXXX-blue)
 
 # MasterThesis - NBREATH_DB - Nasal Bacterial & REspiratory Atlas in Humans DataBase
