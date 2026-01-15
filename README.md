@@ -1,3 +1,9 @@
+<!-- Badges -->
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Python Version](https://img.shields.io/badge/python-3.10-blue.svg)
+![GitHub last commit](https://img.shields.io/github/last-commit/MSBIDynamics/Nasal_Community_database/main)
+![Zenodo DOI](https://img.shields.io/badge/DOI-10.1234/zenodo.XXXX-blue)
+
 # MasterThesis - NBREATH_DB - Nasal Bacterial & REspiratory Atlas in Humans DataBase
 
 A comprehensive web application designed to model, visualize, and analyze the complex relationships between nasal microbiome species, their interactions, migration patterns, and contributions to disease pathogenesis.
